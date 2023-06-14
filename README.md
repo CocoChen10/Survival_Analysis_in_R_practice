@@ -13,7 +13,7 @@ variable description
 7.  fu_time (follow-up time, i.e. time in days since admission to hospital)
 
 model discription
-coxph() : build survival model in R
-ggcoxzph() : test proportional assumption
-ggcoxfunctional() : test the linearity of continuous variable with the outcome(death)
-ggcoxdiagnostics() : test the outlier
+1. coxph() : build survival model in R
+2. ggcoxzph() : test proportional assumption
+3. ggcoxfunctional() : test the linearity of continuous variable with the outcome(death)
+4. ggcoxdiagnostics() : test the outlier
