@@ -1,1 +1,44 @@
+require(rio)
+require(survival)
+require(ggplot2)
+require(survminer)
 
+#import data
+data_raw <- import("G:/week01_data.csv")
+
+#including variable for the model
+#1. continuous variable : age
+summary(data_raw$age) #no missing value
+cox_age <- coxph(Surv(fu_time,death)~age,data = data_raw)
+ggcoxfunctional(Surv(fu_time,death)~age+log(age)+sqrt(age),
+                data = data_raw) # test the linearity between age and death
+
+#2. simple catagorize variable : gender
+table(data_raw$gender) #no missing value
+cox_gender <- coxph(Surv(fu_time,death)~gender,data = data_raw)
+ggcoxzph(cox.zph(cox_gender)) # valid proportional assumption
+
+#3. complex catagorize variable : 
+table(data_raw$prior_dnas)
+cox_dnas_con <- coxph(Surv(fu_time,death)~prior_dnas,data = data_raw)
+ggcoxfunctional(Surv(fu_time,death)~prior_dnas,data = data_raw) # test linearity 
+############ not linear，see as catagories
+
+require(dplyr)
+data_raw <- mutate(data_raw,dnas_group<-ifelse(data_raw$prior_dnas==0,"0","1"))
+colnames(data_raw)[32] <- "dnas_group"
+data_raw$dnas_group <- factor(data_raw$dnas_group,levels = c("0","1"))
+cox_dnas_cat <- coxph(Surv(fu_time,death)~dnas_group,data = data_raw)
+ggcoxzph(cox.zph(cox_dnas_cat)) # test prportional assumption
+
+#build the initial model
+data_raw$copd <- factor(data_raw$copd,levels = c(0,1))
+cox_multiple <- coxph(Surv(fu_time,death)~age+gender+copd+los+dnas_group,
+                      data = data_raw)
+summary(cox_multiple)
+############## copd has Pr>0.05，remove
+
+cox_multiple2 <- coxph(Surv(fu_time,death)~age+gender+los+dnas_group,
+                       data = data_raw)
+summary(cox_multiple2)
+############# have similar coefficient with the first model
